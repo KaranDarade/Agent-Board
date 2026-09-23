@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build --prefix client",
+  "outputDirectory": "client/dist",
+  "rewrites": [
+    {
+      "source": "/api/fleet/sessions",
+      "destination": "/api/fleet-sessions.js"
+    },
+    {
+      "source": "/api/fleet/stats",
+      "destination": "/api/fleet-stats.js"
+    },
+    {
+      "source": "/api/sessions/:id/steer",
+      "destination": "/api/remote-steer.js"
+    },
+    {
+      "source": "/api/cloud/status",
+      "destination": "/api/cloud-status.js"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

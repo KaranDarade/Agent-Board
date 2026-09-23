@@ -1,0 +1,56 @@
+{
+  "name": "agent-board",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Agent Board — Universal AI Agent Command Center",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "start": "node server/index.js",
+    "server": "node server/index.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client",
+    "desktop": "electron desktop/main.cjs",
+    "dist:portable": "electron-builder --win portable",
+    "dist": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
+    "cors": "^2.8.6",
+    "express": "^4.22.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
+    "electron-updater": "^6.8.9"
+  },
+  "build": {
+    "appId": "com.agentboard.app",
+    "productName": "Agent Board",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "server/**/*",
+      "client/dist/**/*",
+      "desktop/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Agent Board",
+      "perMachine": false
+    }
+  }
+}
