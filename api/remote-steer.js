@@ -1,9 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+function getSupabase() {
+  if (!supabase) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    if (url && key) {
+      supabase = createClient(url, key);
+    }
+  }
+  return supabase;
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,8 +32,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
+  const client = getSupabase();
+  if (!client) {
+    return res.status(500).json({ error: 'Supabase credentials not configured' });
+  }
+
   try {
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('remote_directives')
       .insert({
         session_id: id || 'global',

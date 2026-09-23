@@ -24,6 +24,10 @@
       "destination": "/api/download-desktop.js"
     },
     {
+      "source": "/api/tools",
+      "destination": "/api/tools.js"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

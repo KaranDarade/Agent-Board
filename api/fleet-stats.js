@@ -1,9 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+function getSupabase() {
+  if (!supabase) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    if (url && key) {
+      supabase = createClient(url, key);
+    }
+  }
+  return supabase;
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,10 +21,28 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  const client = getSupabase();
+  if (!client) {
+    return res.status(200).json({
+      totalSessions: 0,
+      activeSessions: 0,
+      idleSessions: 0,
+      archivedSessions: 0,
+      planModeSessions: 0,
+      buildModeSessions: 0,
+      totalCost: 0,
+      totalTokens: 0,
+      toolsDistribution: { opencode: 0, cursor: 0, antigravity: 0, 'claude-code': 0 },
+      roleDistribution: {},
+      modelDistribution: {},
+      discoveredTools: []
+    });
+  }
+
   try {
     // 1. Check if high-fidelity local telemetry stats were synced to fleet_telemetry
     try {
-      const { data: telemetry } = await supabase
+      const { data: telemetry } = await client
         .from('fleet_telemetry')
         .select('stats')
         .eq('id', 'global')
@@ -29,7 +54,7 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // 2. Fallback to computing from fleet_sessions table
-    const { data: sessions, error } = await supabase
+    const { data: sessions, error } = await client
       .from('fleet_sessions')
       .select('*');
 
@@ -90,6 +115,9 @@ export default async function handler(req, res) {
       totalCost,
       totalTokens,
       connectedTools,
+      toolsDistribution: byTool,
+      roleDistribution: { plan: planModeSessions, build: buildModeSessions },
+      modelDistribution: byModel,
       byTool,
       byModel
     });

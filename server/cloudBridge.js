@@ -117,17 +117,7 @@ export async function syncLocalFleetToCloud() {
             .from('fleet_telemetry')
             .upsert({
               id: 'global',
-              stats: {
-                totalSessions: stats.totalSessions,
-                activeSessions: stats.activeSessions,
-                idleSessions: stats.idleSessions,
-                archivedSessions: stats.archivedSessions,
-                totalCost: stats.totalCost,
-                totalTokens: stats.totalTokens,
-                connectedTools: stats.connectedTools,
-                byTool: stats.byTool,
-                byModel: stats.byModel
-              },
+              stats: stats,
               updated_at: new Date().toISOString()
             }, { onConflict: 'id' });
         } catch (telemetryErr) {
