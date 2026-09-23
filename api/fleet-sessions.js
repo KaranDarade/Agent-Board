@@ -25,21 +25,32 @@ export default async function handler(req, res) {
     }
 
     // Format fields to match frontend schema
-    const sessions = (data || []).map(row => ({
-      id: row.id,
-      toolName: row.tool_name,
-      title: row.title,
-      directory: row.directory,
-      projectName: row.project_name,
-      model: row.model,
-      role: row.role,
-      agentRole: row.role,
-      status: row.status,
-      isActive: Boolean(row.is_active),
-      tasksCount: row.tasks_count || 0,
-      completedTasksCount: row.completed_tasks_count || 0,
-      updatedAt: row.updated_at
-    }));
+    const sessions = (data || []).map(row => {
+      const toolId = (row.tool_name || 'opencode').toLowerCase().replace(/\s+/g, '-');
+      const toolDisplayName = toolId === 'opencode' ? 'OpenCode' : (toolId === 'cursor' ? 'Cursor AI' : (toolId === 'antigravity' ? 'Antigravity' : (toolId === 'claude-code' ? 'Claude Code' : row.tool_name)));
+      const timestamp = row.updated_at ? new Date(row.updated_at).getTime() : Date.now();
+
+      return {
+        id: row.id,
+        tool: toolId,
+        toolName: toolDisplayName,
+        title: row.title,
+        directory: row.directory,
+        projectName: row.project_name,
+        model: row.model,
+        role: row.role || 'plan',
+        agentRole: row.role || 'plan',
+        status: row.status || 'active',
+        isActive: Boolean(row.is_active),
+        tasksCount: row.tasks_count || 0,
+        completedTasksCount: row.completed_tasks_count || 0,
+        updatedAt: row.updated_at,
+        timeUpdated: timestamp,
+        timeCreated: timestamp,
+        cost: Number(row.cost || 0),
+        tokens: { total: Number(row.tokens || 0) }
+      };
+    });
 
     return res.status(200).json(sessions);
   } catch (err) {

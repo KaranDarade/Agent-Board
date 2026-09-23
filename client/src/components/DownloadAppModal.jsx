@@ -16,11 +16,20 @@ export default function DownloadAppModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const isCloud = typeof window !== 'undefined' && 
+    !window.location.hostname.includes('localhost') && 
+    !window.location.hostname.includes('127.0.0.1') && 
+    !window.location.hostname.startsWith('192.168.');
+
   const handleDownload = () => {
     setDownloading(true);
-    // Trigger download of windows installer from server
-    window.location.href = '/api/download/desktop';
-    setTimeout(() => setDownloading(false), 3000);
+    if (isCloud) {
+      window.open('https://github.com/KaranDarade/Agent-Board/releases', '_blank');
+      setTimeout(() => setDownloading(false), 1000);
+    } else {
+      window.location.href = '/api/download/desktop';
+      setTimeout(() => setDownloading(false), 3000);
+    }
   };
 
   return (
@@ -73,15 +82,20 @@ export default function DownloadAppModal({ isOpen, onClose }) {
               {downloading ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Preparing Installer...</span>
+                  <span>Preparing Download...</span>
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4 stroke-[2.5]" />
-                  <span>Download for Windows (.exe)</span>
+                  <span>{isCloud ? 'Download from GitHub Releases (.exe)' : 'Download for Windows (.exe)'}</span>
                 </>
               )}
             </button>
+            {isCloud && (
+              <p className="text-[10px] text-slate-400 text-center">
+                Hosted via GitHub Releases. When on your local Windows PC, you can also download directly at <span className="font-mono text-gold-500">http://localhost:3001</span>.
+              </p>
+            )}
           </div>
 
           {/* Value Props & Safety Assurance */}

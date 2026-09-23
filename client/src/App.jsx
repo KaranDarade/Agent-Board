@@ -259,6 +259,20 @@ export default function App() {
     return true;
   });
 
+  // Sort sessions: Active sessions first, then most recently updated first
+  const sortedSessions = [...filteredSessions].sort((a, b) => {
+    // 1. Active sessions prioritized
+    const aActive = a.isActive || a.status === 'active';
+    const bActive = b.isActive || b.status === 'active';
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+
+    // 2. Most recent first (compare timeUpdated, updatedAt, or timeCreated)
+    const aTime = (a.timeUpdated || 0) || (a.updatedAt ? new Date(a.updatedAt).getTime() : 0) || (a.timeCreated || 0);
+    const bTime = (b.timeUpdated || 0) || (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) || (b.timeCreated || 0);
+    return bTime - aTime;
+  });
+
   const uniqueProjects = Array.from(new Set(sessions.map(s => s.projectName).filter(Boolean)));
 
   return (
@@ -447,7 +461,7 @@ export default function App() {
 
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSessions.map((session) => (
+                {sortedSessions.map((session) => (
                   <SessionCard
                     key={session.id}
                     session={session}
@@ -463,7 +477,7 @@ export default function App() {
               </div>
             ) : (
               <SessionTableView
-                sessions={filteredSessions}
+                sessions={sortedSessions}
                 onInspect={(id) => setInspectingSessionId(id)}
                 onDeactivate={handleDeactivate}
                 onActivate={handleActivate}

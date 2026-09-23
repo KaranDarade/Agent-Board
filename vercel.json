@@ -20,6 +20,10 @@
       "destination": "/api/cloud-status.js"
     },
     {
+      "source": "/api/download/desktop",
+      "destination": "/api/download-desktop.js"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

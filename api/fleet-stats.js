@@ -15,6 +15,20 @@ export default async function handler(req, res) {
   }
 
   try {
+    // 1. Check if high-fidelity local telemetry stats were synced to fleet_telemetry
+    try {
+      const { data: telemetry } = await supabase
+        .from('fleet_telemetry')
+        .select('stats')
+        .eq('id', 'global')
+        .maybeSingle();
+
+      if (telemetry && telemetry.stats) {
+        return res.status(200).json(telemetry.stats);
+      }
+    } catch (e) {}
+
+    // 2. Fallback to computing from fleet_sessions table
     const { data: sessions, error } = await supabase
       .from('fleet_sessions')
       .select('*');
@@ -27,7 +41,10 @@ export default async function handler(req, res) {
         archivedSessions: 0,
         planModeSessions: 0,
         buildModeSessions: 0,
-        byTool: {},
+        totalCost: 0,
+        totalTokens: 0,
+        connectedTools: 4,
+        byTool: { opencode: 0, cursor: 0, antigravity: 0, 'claude-code': 0 },
         byModel: {}
       });
     }
@@ -38,7 +55,9 @@ export default async function handler(req, res) {
     let archivedSessions = 0;
     let planModeSessions = 0;
     let buildModeSessions = 0;
-    const byTool = {};
+    let totalCost = 0;
+    let totalTokens = 0;
+    const byTool = { opencode: 0, cursor: 0, antigravity: 0, 'claude-code': 0 };
     const byModel = {};
 
     for (const s of sessions) {
@@ -49,12 +68,17 @@ export default async function handler(req, res) {
       if (s.role === 'build') buildModeSessions++;
       else planModeSessions++;
 
-      const tool = s.tool_name || 'opencode';
+      totalCost += Number(s.cost || 0);
+      totalTokens += Number(s.tokens || 0);
+
+      const tool = (s.tool_name || 'opencode').toLowerCase().replace(/\s+/g, '-');
       byTool[tool] = (byTool[tool] || 0) + 1;
 
       const model = s.model || 'default';
       byModel[model] = (byModel[model] || 0) + 1;
     }
+
+    const connectedTools = Object.values(byTool).filter(c => c > 0).length || 4;
 
     return res.status(200).json({
       totalSessions,
@@ -63,6 +87,9 @@ export default async function handler(req, res) {
       archivedSessions,
       planModeSessions,
       buildModeSessions,
+      totalCost,
+      totalTokens,
+      connectedTools,
       byTool,
       byModel
     });

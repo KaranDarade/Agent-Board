@@ -72,20 +72,20 @@ export async function syncLocalFleetToCloud() {
     const sessions = getAllFleetSessions();
     const stats = getUniversalFleetStats();
 
-    // Map top 50 active and recent sessions for cloud mirror
-    const payload = sessions.slice(0, 50).map(s => ({
+    // Map all active and recent sessions for cloud mirror (up to 250)
+    const payload = sessions.slice(0, 250).map(s => ({
       id: s.id,
-      tool_name: s.toolName || 'opencode',
+      tool_name: s.tool || 'opencode',
       title: s.title || 'Untitled Session',
       directory: s.directory || '',
       project_name: s.projectName || '',
       model: s.model || '',
       role: s.role || 'plan',
       status: s.status || 'active',
-      is_active: Boolean(s.isActive),
+      is_active: Boolean(s.isActive || s.status === 'active'),
       tasks_count: s.tasksCount || 0,
       completed_tasks_count: s.completedTasksCount || 0,
-      updated_at: new Date().toISOString()
+      updated_at: new Date(s.timeUpdated || s.timeCreated || Date.now()).toISOString()
     }));
 
     if (payload.length > 0) {
@@ -110,6 +110,29 @@ export async function syncLocalFleetToCloud() {
         cloudStatus.lastSyncTime = Date.now();
         cloudStatus.syncedCount = payload.length;
         cloudStatus.error = null;
+
+        // Also attempt to sync high-level telemetry stats if fleet_telemetry table exists
+        try {
+          await supabase
+            .from('fleet_telemetry')
+            .upsert({
+              id: 'global',
+              stats: {
+                totalSessions: stats.totalSessions,
+                activeSessions: stats.activeSessions,
+                idleSessions: stats.idleSessions,
+                archivedSessions: stats.archivedSessions,
+                totalCost: stats.totalCost,
+                totalTokens: stats.totalTokens,
+                connectedTools: stats.connectedTools,
+                byTool: stats.byTool,
+                byModel: stats.byModel
+              },
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+        } catch (telemetryErr) {
+          // Non-fatal if table not created yet
+        }
       }
     }
   } catch (err) {
