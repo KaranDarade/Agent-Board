@@ -1,4 +1,4 @@
-# ⚡ OpenCode Agent Fleet (Universal Hub)
+# ⚡ Agent Board (Universal Hub)
 
 A high-performance **Multi-Tool AI Coding Agent Fleet Manager** with a luxury **Black, Gold & White** aesthetic, full **Dark & Light theme** support, real-time cross-tool session tracking, and 24/7 mobile access.
 
