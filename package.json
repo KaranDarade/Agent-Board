@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Agent Board — Universal AI Agent Command Center",
   "main": "desktop/main.cjs",
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
     "start": "node server/index.js",
     "server": "node server/index.js",
