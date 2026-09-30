@@ -52,7 +52,7 @@ export function archiveFleetSession(sessionId, tool) {
     }
   }
 
-  return { success: true, id: sessionId, status: 'archived', time_archived: Date.now() };
+  return { success: true, id: sessionId, status: 'archived', archived: true, time_archived: Date.now() };
 }
 
 export function reactivateFleetSession(sessionId, tool) {
@@ -69,7 +69,7 @@ export function reactivateFleetSession(sessionId, tool) {
     }
   }
 
-  return { success: true, id: sessionId, status: 'active' };
+  return { success: true, id: sessionId, status: 'active', archived: false };
 }
 
 export function getFleetDirectives(sessionId) {

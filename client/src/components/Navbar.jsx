@@ -73,7 +73,7 @@ export default function Navbar({
           </button>
 
           {/* Active Agents Beacon */}
-          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-ivory-200 dark:bg-obsidian-900 border border-gold-500/20 text-xs">
+          <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-ivory-200 dark:bg-obsidian-900 border border-gold-500/20 text-xs shrink-0">
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
             <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px]">
               {activeCount} Active
@@ -84,7 +84,7 @@ export default function Navbar({
           {isDesktop ? (
             <button
               onClick={() => window.agentBoardDesktop?.checkForUpdates()}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition"
+              className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition shrink-0"
               title="Desktop App Active — Click to check for updates"
             >
               <Laptop className="w-4 h-4 text-gold-500" />
@@ -93,7 +93,7 @@ export default function Navbar({
           ) : (
             <button
               onClick={onOpenDownload}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition"
+              className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition shrink-0"
               title="Download Agent Board for Desktop"
             >
               <Download className="w-4 h-4 text-gold-500" />
@@ -104,7 +104,7 @@ export default function Navbar({
           {/* Mobile Access Button */}
           <button
             onClick={onOpenMobile}
-            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition"
+            className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition shrink-0"
             title="Open on Mobile / 24/7 Access"
           >
             <Smartphone className="w-4 h-4 text-gold-500" />

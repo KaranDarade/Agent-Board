@@ -204,6 +204,7 @@ export function addSessionTask(sessionId, { content, priority = 'medium' }) {
     `).run(sessionId, content.trim(), priority, position, now, now);
 
     return {
+      id: position,
       session_id: sessionId,
       content: content.trim(),
       status: 'pending',

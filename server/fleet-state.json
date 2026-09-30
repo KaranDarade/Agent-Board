@@ -140,7 +140,9 @@
     "ses_mudv42oiu1NZR3CPU6YP": "plan",
     "ses_mudvx1d2RM24qT1VWKXr": "plan",
     "ses_mudxiqfitvo9pMjNgh9M": "plan",
-    "ses_mue3nww7msrkn8a4sTEP": "plan"
+    "ses_mue3nww7msrkn8a4sTEP": "plan",
+    "ses_muo1009d4qRsyHccs5NQ": "plan",
+    "ses_muo153emIYrODgCF0aBJ": "plan"
   },
   "customModels": {
     "ses_mucrdajxvtsb6BEdQmwn": {
@@ -180,6 +182,16 @@
     },
     "ses_mue3nww7msrkn8a4sTEP": {
       "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_muo1009d4qRsyHccs5NQ": {
+      "id": "claude-3-5-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_muo153emIYrODgCF0aBJ": {
+      "id": "claude-3-5-sonnet",
       "providerID": "anthropic",
       "variant": "high"
     }

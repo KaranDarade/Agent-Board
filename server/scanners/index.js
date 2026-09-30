@@ -107,6 +107,7 @@ export function getUniversalFleetStats() {
     totalCost: Number(totalCost.toFixed(2)),
     totalTokens,
     toolsDistribution: toolCounts,
+    toolBreakdown: toolCounts,
     roleDistribution: roleCounts,
     modelDistribution: modelCounts,
     discoveredTools: getDiscoveredTools()
