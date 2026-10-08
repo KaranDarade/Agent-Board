@@ -404,6 +404,19 @@ SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 > 3. Under **Vercel Authentication**, set the toggle to **Disabled**.
 > 4. Click **Save**. The dashboard and APIs will immediately serve without login requirements.
 
+### 4. Automated Supabase Keep-Alive (Free-Tier Inactivity Ping)
+Supabase Free-tier projects pause automatically after periods of complete inactivity. Agent Board includes a minimal, read-only GitHub Actions workflow ([`.github/workflows/supabase-keepalive.yml`](.github/workflows/supabase-keepalive.yml)) to prevent unexpected project pausing.
+
+- **Execution Cadence**: Runs automatically once per day (06:00 UTC / 11:30 AM IST) via GitHub Actions cron.
+- **Read-Only Minimal Query**: Queries the existing `fleet_sessions` table for a single record (`GET /rest/v1/fleet_sessions?select=id&limit=1`).
+- **Zero Impact on Data**: Performs **no** `INSERT`, `UPDATE`, or `DELETE` operations, generates no dummy rows, and introduces negligible database load (< 5ms).
+- **Minimum Privilege Credentials**: Requires only the public **anon key** (`SUPABASE_ANON_KEY`) and `SUPABASE_URL`. No elevated service-role permissions needed.
+- **Required GitHub Secrets**:
+  - `SUPABASE_URL`: Your Supabase project URL (`https://<project-id>.supabase.co`).
+  - `SUPABASE_ANON_KEY`: Your project's public anonymous API key.
+- **Manual Trigger**: Navigate to your GitHub repository $\rightarrow$ **Actions** $\rightarrow$ select **Supabase Keep-Alive** $\rightarrow$ click **Run workflow**.
+- **Disabling the Mechanism**: To turn it off, select the workflow in GitHub Actions $\rightarrow$ click **`...`** $\rightarrow$ **Disable workflow**, or delete the `.github/workflows/supabase-keepalive.yml` file.
+
 ---
 
 ## 📡 API Endpoints Reference

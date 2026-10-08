@@ -1,0 +1,53 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Runs once daily at 06:00 UTC (11:30 AM IST)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  keepalive:
+    name: Supabase Database Activity Ping
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate Secrets & Execute Read Query
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Required secrets missing. Please add SUPABASE_URL and SUPABASE_ANON_KEY to Repository Secrets."
+            exit 1
+          fi
+
+          # Strip any trailing slash from the URL
+          CLEAN_URL="${SUPABASE_URL%/}"
+          ENDPOINT="${CLEAN_URL}/rest/v1/fleet_sessions?select=id&limit=1"
+
+          echo "Initiating minimal read query to Supabase PostgREST endpoint..."
+          
+          # Perform lightweight read (limit 1 row, id column only)
+          HTTP_RESPONSE=$(curl -sS -o /tmp/supabase_response.json -w "%{http_code}" \
+            -X GET "$ENDPOINT" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Accept: application/json")
+
+          if [ "$HTTP_RESPONSE" -eq 200 ]; then
+            RECORD_COUNT=$(jq '. | length' /tmp/supabase_response.json 2>/dev/null || echo "1")
+            echo "✅ Supabase keep-alive succeeded (HTTP 200 OK)."
+            echo "Read query completed: $RECORD_COUNT record(s) inspected without data mutations."
+          else
+            echo "::error::Supabase keep-alive failed with HTTP status: $HTTP_RESPONSE"
+            if [ -f /tmp/supabase_response.json ]; then
+              echo "Response payload: $(cat /tmp/supabase_response.json | head -c 200)"
+            fi
+            exit 1
+          fi
