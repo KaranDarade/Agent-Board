@@ -2,6 +2,16 @@
   "archived": [],
   "directives": [
     {
+      "id": "dir_1793706116539",
+      "sessionId": "ses_mw0mauttxhyTq3DwkGRw",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793706116540,
+      "status": "failed",
+      "output": "timestamp=2026-11-03T11:41:57.805Z level=INFO run=7e97cea6 message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T11:41:57.808Z level=INFO run=7e97cea6 message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T11:41:58.232Z level=INFO run=7e97cea6 message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T11:41:58.240Z level=INFO run=7e97cea6 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-11-03T11:41:58.246Z level=INFO run=7e97cea6 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-11-03T11:41:58.246Z level=INFO run=7e97cea6 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-11-03T11:41:58.354Z level=INFO run=7e97cea6 message=\"all LSPs are disabled\"\ntimestamp=2026-11-03T11:41:58.356Z level=INFO run=7e97cea6 message=\"all formatters are disabled\"\ntimestamp=2026-11-03T11:41:58.356Z level=INFO run=7e97cea6 message=init\ntimestamp=2026-11-03T11:41:58.806Z level=INFO run=7e97cea6 message=\"event connected\"\ntimestamp=2026-11-03T11:41:59.801Z level=ERROR run=7e97cea6 message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-11-03T11:41:59.816Z level=INFO run=7e97cea6 message=loop session.id=ses_mw0mauttxhyTq3DwkGRw step=0\ntimestamp=2026-11-03T11:41:59.822Z level=ERROR run=7e97cea6 message=failed ref=err_1da7fe9f error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_1da7fe9f\"\n  }\n}\r\ntimestamp=2026-11-03T11:41:59.824Z level=INFO run=7e97cea6 message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
       "id": "dir_1793703489141",
       "sessionId": "ses_mw0kqg7b9a9w41mXy3ox",
       "tool": "opencode",
@@ -232,7 +242,8 @@
     "ses_mvuzbv2vIwD2GvXlVhPS": "plan",
     "ses_mw0ibvodqjGONaQiei62": "plan",
     "ses_mw0k67r1WFvHaBM6ZWG2": "plan",
-    "ses_mw0kqg7b9a9w41mXy3ox": "plan"
+    "ses_mw0kqg7b9a9w41mXy3ox": "plan",
+    "ses_mw0mauttxhyTq3DwkGRw": "plan"
   },
   "customModels": {
     "ses_mucrdajxvtsb6BEdQmwn": {
@@ -331,6 +342,11 @@
       "variant": "high"
     },
     "ses_mw0kqg7b9a9w41mXy3ox": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mw0mauttxhyTq3DwkGRw": {
       "id": "claude-3-7-sonnet",
       "providerID": "anthropic",
       "variant": "high"

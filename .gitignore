@@ -10,3 +10,4 @@ dist-desktop/
 *.db
 *.db-shm
 *.db-wal
+server/outbox/

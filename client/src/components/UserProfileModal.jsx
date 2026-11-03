@@ -11,11 +11,15 @@ import {
   CheckCircle2, 
   RefreshCw,
   ShieldCheck,
-  Key
+  Key,
+  DownloadCloud,
+  Laptop
 } from 'lucide-react';
+import DesktopUpdateModal from './DesktopUpdateModal.jsx';
 
 export default function UserProfileModal({ isOpen, onClose, user, token, onProfileUpdated, onSignOut }) {
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password' | 'danger'
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password' | 'updates' | 'danger'
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -177,6 +181,16 @@ export default function UserProfileModal({ isOpen, onClose, user, token, onProfi
             Password
           </button>
           <button
+            onClick={() => { setActiveTab('updates'); setError(null); setSuccess(null); }}
+            className={`pb-2 px-3 border-b-2 transition ${
+              activeTab === 'updates'
+                ? 'border-gold-500 text-gold-500'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            Updates
+          </button>
+          <button
             onClick={() => { setActiveTab('danger'); setError(null); setSuccess(null); }}
             className={`pb-2 px-3 border-b-2 transition ${
               activeTab === 'danger'
@@ -315,6 +329,34 @@ export default function UserProfileModal({ isOpen, onClose, user, token, onProfi
             </form>
           )}
 
+          {/* TAB: UPDATES */}
+          {activeTab === 'updates' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-ivory-200/50 dark:bg-obsidian-950/60 border border-black/5 dark:border-white/5 space-y-3">
+                <div className="flex items-center space-x-2 text-gold-500 font-bold text-xs">
+                  <Laptop className="w-4 h-4" />
+                  <span>Desktop Cockpit Version & Auto-Updates</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Agent Board delivers background binary updates through GitHub Releases. Whenever a new version is released, the desktop client will download it and allow you to restart to apply immediately.
+                </p>
+                <div className="pt-1 flex items-center justify-between text-[11px] font-mono text-slate-600 dark:text-slate-300">
+                  <span>Current Version:</span>
+                  <span className="font-bold text-gold-500">v1.0.0 (Production Release)</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="w-full py-2.5 rounded-xl bg-gold-500 hover:bg-gold-400 text-obsidian-950 font-bold transition flex items-center justify-center space-x-2 shadow-gold-sm"
+              >
+                <DownloadCloud className="w-4 h-4" />
+                <span>Open Update Manager & Check Now</span>
+              </button>
+            </div>
+          )}
+
           {/* TAB: DANGER ZONE */}
           {activeTab === 'danger' && (
             <div className="space-y-4">
@@ -354,6 +396,11 @@ export default function UserProfileModal({ isOpen, onClose, user, token, onProfi
           )}
         </div>
       </div>
+
+      <DesktopUpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+      />
     </div>
   );
 }

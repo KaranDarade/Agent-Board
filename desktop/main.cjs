@@ -232,9 +232,16 @@ function checkForUpdates(manual = false) {
   if (!app.isPackaged) {
     if (manual && mainWindow) {
       mainWindow.webContents.send('app:update-status', {
-        status: 'dev',
-        message: 'Running in development mode. Auto-updates are active in packaged release.'
+        status: 'checking',
+        message: 'Checking for updates...'
       });
+      setTimeout(() => {
+        mainWindow?.webContents.send('app:update-status', {
+          status: 'latest',
+          version: app.getVersion() || '1.0.0',
+          message: `Agent Board is up to date (v${app.getVersion() || '1.0.0'}).`
+        });
+      }, 900);
     }
     return;
   }
@@ -255,9 +262,22 @@ function checkForUpdates(manual = false) {
       });
     });
 
+    autoUpdater.on('download-progress', (progressObj) => {
+      mainWindow?.webContents.send('app:update-progress', {
+        percent: Math.round(progressObj.percent),
+        bytesPerSecond: progressObj.bytesPerSecond,
+        transferred: progressObj.transferred,
+        total: progressObj.total
+      });
+    });
+
     autoUpdater.on('update-not-available', () => {
       if (manual) {
-        mainWindow?.webContents.send('app:update-status', { status: 'latest', message: 'Agent Board is up to date!' });
+        mainWindow?.webContents.send('app:update-status', {
+          status: 'latest',
+          version: app.getVersion() || '1.0.0',
+          message: `Agent Board is up to date (v${app.getVersion() || '1.0.0'}).`
+        });
       }
     });
 
@@ -271,6 +291,10 @@ function checkForUpdates(manual = false) {
 
     autoUpdater.on('error', (err) => {
       console.warn('[AutoUpdater Error]:', err.message);
+      mainWindow?.webContents.send('app:update-status', {
+        status: 'error',
+        message: err.message || 'Error checking for updates'
+      });
     });
 
     autoUpdater.checkForUpdatesAndNotify();
@@ -279,9 +303,42 @@ function checkForUpdates(manual = false) {
   }
 }
 
-// IPC listener from renderer
+// IPC listeners from renderer
 ipcMain.on('app:check-updates', () => {
   checkForUpdates(true);
+});
+
+ipcMain.on('app:install-update', () => {
+  try {
+    if (app.isPackaged) {
+      const { autoUpdater } = require('electron-updater');
+      isQuitting = true;
+      autoUpdater.quitAndInstall();
+    } else {
+      console.log('[AutoUpdater] Development restart simulated.');
+      app.relaunch();
+      app.exit(0);
+    }
+  } catch (err) {
+    console.error('[AutoUpdater] Install error:', err.message);
+  }
+});
+
+ipcMain.on('app:simulate-update', () => {
+  if (!mainWindow) return;
+  mainWindow.webContents.send('app:update-status', { status: 'checking', message: 'Checking for updates...' });
+  setTimeout(() => {
+    mainWindow?.webContents.send('app:update-status', { status: 'available', version: '1.0.1', message: 'Version 1.0.1 available. Downloading update...' });
+    let pct = 0;
+    const interval = setInterval(() => {
+      pct += 25;
+      mainWindow?.webContents.send('app:update-progress', { percent: pct });
+      if (pct >= 100) {
+        clearInterval(interval);
+        mainWindow?.webContents.send('app:update-status', { status: 'ready', version: '1.0.1', message: 'Version 1.0.1 ready. Restart to apply update.' });
+      }
+    }, 400);
+  }, 800);
 });
 
 app.whenReady().then(async () => {

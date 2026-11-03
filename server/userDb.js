@@ -21,6 +21,7 @@ export function getAuthDb() {
         display_name TEXT,
         avatar_url TEXT,
         provider TEXT DEFAULT 'email',
+        welcome_email_sent INTEGER DEFAULT 0,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         last_login_at INTEGER
@@ -41,7 +42,16 @@ export function getAuthDb() {
         created_at INTEGER NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
+
+      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+      CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(token);
+      CREATE INDEX IF NOT EXISTS idx_password_otps_email ON password_otps(email);
     `);
+
+    // Safe migration if table previously existed without welcome_email_sent
+    try {
+      db.exec(`ALTER TABLE users ADD COLUMN welcome_email_sent INTEGER DEFAULT 0;`);
+    } catch (e) {}
   }
   return db;
 }
@@ -83,7 +93,8 @@ export function createUser({ email, password, displayName = '', provider = 'emai
     displayName: finalName,
     avatarUrl,
     provider,
-    createdAt: now
+    createdAt: now,
+    isNewUser: true
   };
 }
 
@@ -121,8 +132,10 @@ export function createOrLoginGoogleUser({ email, displayName = '', avatarUrl = '
 
   let user = database.prepare('SELECT * FROM users WHERE email = ?').get(normalizedEmail);
   const now = Date.now();
+  let isNewUser = false;
 
   if (!user) {
+    isNewUser = true;
     const id = 'usr_' + crypto.randomBytes(12).toString('hex');
     const finalName = displayName?.trim() || normalizedEmail.split('@')[0];
     database.prepare(`
@@ -143,7 +156,8 @@ export function createOrLoginGoogleUser({ email, displayName = '', avatarUrl = '
     avatarUrl: user.avatar_url,
     provider: user.provider,
     createdAt: user.created_at,
-    lastLoginAt: now
+    lastLoginAt: now,
+    isNewUser
   };
 }
 
@@ -327,3 +341,15 @@ export function deleteUser(userId) {
   database.prepare('DELETE FROM users WHERE id = ?').run(userId);
   return { success: true, id: userId };
 }
+
+export function markWelcomeEmailSent(userId) {
+  const database = getAuthDb();
+  database.prepare('UPDATE users SET welcome_email_sent = 1 WHERE id = ?').run(userId);
+}
+
+export function isWelcomeEmailSent(userId) {
+  const database = getAuthDb();
+  const row = database.prepare('SELECT welcome_email_sent FROM users WHERE id = ?').get(userId);
+  return Boolean(row?.welcome_email_sent);
+}
+

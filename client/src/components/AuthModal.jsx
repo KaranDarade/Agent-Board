@@ -59,11 +59,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  // Google OAuth configuration modal state
-  const [showGoogleConfig, setShowGoogleConfig] = useState(false);
-  const [googleClientIdInput, setGoogleClientIdInput] = useState('');
-  const [savingGoogleConfig, setSavingGoogleConfig] = useState(false);
-
   if (!isOpen) return null;
 
   const resetForm = () => {
@@ -157,7 +152,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
       const data = await res.json();
 
       if (!res.ok || !data.configured || !data.url) {
-        setShowGoogleConfig(true);
+        setError('Google Sign-In is temporarily unavailable. Please sign in with email & password or configure GOOGLE_CLIENT_ID on the server.');
         setLoading(false);
         return;
       }
@@ -165,41 +160,38 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
       // 2. Open Google OAuth consent screen
       if (isDesktop && window.agentBoardDesktop?.openExternal) {
         window.agentBoardDesktop.openExternal(data.url);
-        setError('Google sign-in opened in your system browser. Complete login there to unlock your cockpit.');
+        setSuccessMsg('Google sign-in opened in your system browser. Complete login there to unlock your cockpit.');
       } else {
-        window.location.href = data.url;
+        // Standard Web: Open centered popup and listen for postMessage completion
+        const width = 500;
+        const height = 650;
+        const left = window.screen.width / 2 - width / 2;
+        const top = window.screen.height / 2 - height / 2;
+        const popup = window.open(
+          data.url,
+          'agent_board_google_auth',
+          `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes`
+        );
+
+        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+          // Popup blocked by browser -> fallback to direct redirect
+          window.location.href = data.url;
+          return;
+        }
+
+        const handlePopupMessage = (event) => {
+          if (event.data?.type === 'GOOGLE_AUTH_SUCCESS' && event.data?.token) {
+            window.removeEventListener('message', handlePopupMessage);
+            onAuthSuccess(event.data.user, event.data.token);
+            onClose();
+          }
+        };
+        window.addEventListener('message', handlePopupMessage);
       }
     } catch (err) {
       setError(err.message || 'Google authentication failed');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Save Google Client ID handler
-  const handleSaveGoogleConfig = async (e) => {
-    e?.preventDefault();
-    if (!googleClientIdInput.trim()) {
-      setError('Please enter a valid Google Client ID');
-      return;
-    }
-    setSavingGoogleConfig(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/auth/google/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clientId: googleClientIdInput.trim() })
-      });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error || 'Failed to save Google Client ID');
-
-      setShowGoogleConfig(false);
-      setSuccessMsg('Google Client ID saved! Click Continue with Google to authenticate.');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSavingGoogleConfig(false);
     }
   };
 
@@ -675,65 +667,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
           )}
         </div>
       </div>
-
-      {/* Modal for Google Client ID Configuration */}
-      {showGoogleConfig && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-ivory-100 dark:bg-obsidian-900 border border-gold-500/40 rounded-2xl p-6 max-w-lg w-full shadow-gold-lg">
-            <div className="flex items-center space-x-2 text-gold-500 mb-2">
-              <Settings className="w-5 h-5" />
-              <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Configure Google OAuth 2.0
-              </h3>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-              Agent Board connects directly to official Google OAuth 2.0 servers. To enable 1-click Google Sign-In:
-            </p>
-
-            <div className="bg-ivory-200 dark:bg-obsidian-950 p-3.5 rounded-xl border border-black/10 dark:border-white/10 text-xs text-slate-700 dark:text-slate-300 space-y-2 mb-4 font-mono">
-              <div>1. Visit <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer" className="text-gold-500 underline font-semibold">Google Cloud Console → Credentials</a>.</div>
-              <div>2. Create an <strong>OAuth 2.0 Client ID</strong> (Web application).</div>
-              <div>3. Add Authorized redirect URI:</div>
-              <div className="p-2 bg-black/20 dark:bg-black/50 rounded text-gold-400 break-all select-all">
-                http://localhost:3001/api/auth/google/callback
-              </div>
-            </div>
-
-            <form onSubmit={handleSaveGoogleConfig} className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Google Client ID
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={googleClientIdInput}
-                  onChange={(e) => setGoogleClientIdInput(e.target.value)}
-                  placeholder="xxxxxxxxxxxx-xxxxxxxxxxxxxxxx.apps.googleusercontent.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-ivory-200 dark:bg-obsidian-950 border border-black/10 dark:border-white/10 focus:border-gold-500 focus:outline-none text-xs text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-end space-x-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowGoogleConfig(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                >
-                  Cancel / Use Email
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingGoogleConfig}
-                  className="px-5 py-2 rounded-xl text-xs font-black bg-gold-500 text-obsidian-950 hover:bg-gold-400 transition"
-                >
-                  {savingGoogleConfig ? 'Saving...' : 'Save & Enable Google Login'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   LogOut
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle.jsx';
+import DesktopUpdateModal from './DesktopUpdateModal.jsx';
 
 export default function Navbar({ 
   theme, 
@@ -36,6 +37,7 @@ export default function Navbar({
     ? propIsDesktop 
     : (typeof window !== 'undefined' && (Boolean(window.agentBoardDesktop?.isDesktop) || new URLSearchParams(window.location.search).get('app') === 'desktop'));
   const [updateMessage, setUpdateMessage] = useState(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   useEffect(() => {
     if (isDesktop && window.agentBoardDesktop?.onUpdateStatus) {
@@ -146,12 +148,12 @@ export default function Navbar({
               {/* Desktop Status or Download App Button */}
               {isDesktop ? (
                 <button
-                  onClick={() => window.agentBoardDesktop?.checkForUpdates()}
+                  onClick={() => setIsUpdateModalOpen(true)}
                   className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-gold-500/10 hover:bg-gold-500/20 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-xs font-semibold transition shrink-0"
                   title="Desktop App Active — Click to check for updates"
                 >
                   <Laptop className="w-4 h-4 text-gold-500" />
-                  <span className="hidden lg:inline">{updateMessage || 'Desktop App'}</span>
+                  <span className="hidden lg:inline">{updateMessage || 'Check Updates'}</span>
                 </button>
               ) : (
                 <button
@@ -216,6 +218,11 @@ export default function Navbar({
           )}
         </div>
       </div>
+
+      <DesktopUpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+      />
     </header>
   );
 }

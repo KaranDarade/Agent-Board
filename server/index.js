@@ -51,8 +51,13 @@ import {
   resetPasswordWithOtp,
   updateUserProfile,
   changeUserPassword,
-  deleteUser
+  deleteUser,
+  markWelcomeEmailSent
 } from './userDb.js';
+import {
+  sendWelcomeEmail,
+  sendPasswordResetEmail
+} from './emailService.js';
 
 // Auto-load .env
 function loadEnv() {
@@ -523,6 +528,12 @@ app.post('/api/auth/register', (req, res) => {
     }
     const user = createUser({ email, password, displayName });
     const session = createAuthSession(user.id);
+
+    // Send Welcome Email in background with comprehensive guide
+    sendWelcomeEmail({ email: user.email, displayName: user.displayName })
+      .then(() => markWelcomeEmailSent(user.id))
+      .catch((err) => console.error('[Register] Welcome email send error:', err.message));
+
     res.status(201).json({
       success: true,
       user,
@@ -593,7 +604,7 @@ app.get('/api/auth/google/url', (req, res) => {
   if (!clientId) {
     return res.status(400).json({
       configured: false,
-      error: 'Google OAuth is not yet configured. Please supply your GOOGLE_CLIENT_ID.'
+      error: 'Google OAuth is not configured on the server. Please sign in with email and password.'
     });
   }
   const redirectUri = `http://localhost:${PORT}/api/auth/google/callback`;
@@ -656,11 +667,18 @@ app.get('/api/auth/google/callback', async (req, res) => {
     const user = createOrLoginGoogleUser({ email, displayName, avatarUrl });
     const session = createAuthSession(user.id);
 
+    // If new user registered via Google, dispatch luxury Welcome Email
+    if (user.isNewUser) {
+      sendWelcomeEmail({ email: user.email, displayName: user.displayName })
+        .then(() => markWelcomeEmailSent(user.id))
+        .catch((err) => console.error('[Google OAuth] Welcome email error:', err.message));
+    }
+
     // Queue desktop handoff
     pendingDesktopAuth = { token: session.token, user, timestamp: Date.now() };
     broadcastEvent('desktop_auth_ready', { token: session.token, user });
 
-    // HTML redirect that handles both web token storage and desktop deep linking
+    // HTML response that handles popup postMessage, web token storage, and desktop deep linking
     res.send(`
       <!DOCTYPE html>
       <html>
@@ -680,9 +698,22 @@ app.get('/api/auth/google/callback', async (req, res) => {
           try {
             localStorage.setItem('agent_board_session_token', '${session.token}');
           } catch(e) {}
-          setTimeout(function() {
-            window.location.href = '/?auth_success=true&token=${session.token}';
-          }, 900);
+          if (window.opener) {
+            try {
+              window.opener.postMessage({
+                type: 'GOOGLE_AUTH_SUCCESS',
+                token: '${session.token}',
+                user: ${JSON.stringify(user)}
+              }, '*');
+              setTimeout(function() { window.close(); }, 500);
+            } catch (err) {
+              window.location.href = '/?auth_success=true&token=${session.token}';
+            }
+          } else {
+            setTimeout(function() {
+              window.location.href = '/?auth_success=true&token=${session.token}';
+            }, 800);
+          }
         </script>
       </body>
       </html>
@@ -728,6 +759,12 @@ app.post('/api/auth/google/verify-credential', async (req, res) => {
     const user = createOrLoginGoogleUser({ email, displayName, avatarUrl });
     const session = createAuthSession(user.id);
 
+    if (user.isNewUser) {
+      sendWelcomeEmail({ email: user.email, displayName: user.displayName })
+        .then(() => markWelcomeEmailSent(user.id))
+        .catch((err) => console.error('[Google Verify] Welcome email error:', err.message));
+    }
+
     pendingDesktopAuth = { token: session.token, user, timestamp: Date.now() };
     broadcastEvent('desktop_auth_ready', { token: session.token, user });
 
@@ -751,6 +788,13 @@ app.post('/api/auth/google', (req, res) => {
     }
     const user = createOrLoginGoogleUser({ email, displayName, avatarUrl });
     const session = createAuthSession(user.id);
+
+    if (user.isNewUser) {
+      sendWelcomeEmail({ email: user.email, displayName: user.displayName })
+        .then(() => markWelcomeEmailSent(user.id))
+        .catch((err) => console.error('[Google Direct] Welcome email error:', err.message));
+    }
+
     res.json({
       success: true,
       user,
@@ -768,9 +812,14 @@ app.post('/api/auth/forgot-password', (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
     const result = generatePasswordOtp(email);
+
+    // Dispatch luxury 6-digit OTP recovery email in background
+    sendPasswordResetEmail({ email: result.email, otpCode: result.otpPreview })
+      .catch((err) => console.error('[Forgot Password] Email send error:', err.message));
+
     res.json({
       success: true,
-      message: `A 6-digit recovery OTP has been generated for ${email}. Check terminal or inbox.`,
+      message: `A 6-digit recovery OTP has been sent to ${email}.`,
       email: result.email,
       expiresAt: result.expiresAt,
       otpPreview: result.otpPreview

@@ -19,10 +19,17 @@ contextBridge.exposeInMainWorld('agentBoardDesktop', {
 
   // Auto-update controls
   checkForUpdates: () => ipcRenderer.send('app:check-updates'),
+  installUpdate: () => ipcRenderer.send('app:install-update'),
+  simulateUpdate: () => ipcRenderer.send('app:simulate-update'),
   onUpdateStatus: (callback) => {
     const handler = (event, data) => callback(data);
     ipcRenderer.on('app:update-status', handler);
     return () => ipcRenderer.removeListener('app:update-status', handler);
+  },
+  onUpdateProgress: (callback) => {
+    const handler = (event, data) => callback(data);
+    ipcRenderer.on('app:update-progress', handler);
+    return () => ipcRenderer.removeListener('app:update-progress', handler);
   },
 
   // Auth token handoff listener
