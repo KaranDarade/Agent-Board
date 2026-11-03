@@ -12,6 +12,33 @@ let isQuitting = false;
 const SERVER_PORT = 3001;
 const SERVER_URL = `http://localhost:${SERVER_PORT}`;
 
+// Register custom deep link protocol (agentboard://)
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('agentboard', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('agentboard');
+}
+
+function handleDeepLinkUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== 'string') return;
+  try {
+    if (urlStr.startsWith('agentboard://')) {
+      const parsed = new URL(urlStr);
+      const token = parsed.searchParams.get('token');
+      if (token && mainWindow) {
+        mainWindow.webContents.send('app:auth-token', { token });
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    }
+  } catch (err) {
+    console.error('[Desktop] Deep link parse error:', err.message);
+  }
+}
+
 // Enforce single instance
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -19,12 +46,22 @@ if (!gotTheLock) {
   process.exit(0);
 }
 
-app.on('second-instance', () => {
+app.on('second-instance', (event, commandLine) => {
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
   }
+  // Windows: deep link argument in commandLine
+  const deepLink = commandLine.find(arg => arg && arg.startsWith('agentboard://'));
+  if (deepLink) {
+    handleDeepLinkUrl(deepLink);
+  }
+});
+
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  handleDeepLinkUrl(url);
 });
 
 // Check if local engine is already active on port 3001

@@ -39,12 +39,85 @@ import {
   startCloudBridge,
   getCloudStatus
 } from './cloudBridge.js';
+import {
+  createUser,
+  verifyUserPassword,
+  createOrLoginGoogleUser,
+  createSession as createAuthSession,
+  getUserByToken,
+  deleteSession as deleteAuthSession,
+  generatePasswordOtp,
+  verifyPasswordOtp,
+  resetPasswordWithOtp,
+  updateUserProfile,
+  changeUserPassword,
+  deleteUser
+} from './userDb.js';
+
+// Auto-load .env
+function loadEnv() {
+  const candidates = [
+    path.join(process.cwd(), '.env'),
+    path.join(__dirname, '..', '.env')
+  ];
+  for (const envPath of candidates) {
+    if (fs.existsSync(envPath)) {
+      try {
+        const content = fs.readFileSync(envPath, 'utf8');
+        for (const line of content.split('\n')) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) continue;
+          const eqIdx = trimmed.indexOf('=');
+          if (eqIdx !== -1) {
+            const key = trimmed.slice(0, eqIdx).trim();
+            const val = trimmed.slice(eqIdx + 1).trim();
+            if (!process.env[key]) {
+              process.env[key] = val;
+            }
+          }
+        }
+        break;
+      } catch (e) {}
+    }
+  }
+}
+loadEnv();
+
+function saveEnvVar(key, val) {
+  const envPath = path.join(process.cwd(), '.env');
+  let content = '';
+  if (fs.existsSync(envPath)) {
+    content = fs.readFileSync(envPath, 'utf8');
+  }
+  const regex = new RegExp(`^${key}=.*$`, 'm');
+  if (regex.test(content)) {
+    content = content.replace(regex, `${key}=${val}`);
+  } else {
+    content = content.trimEnd() + `\n${key}=${val}\n`;
+  }
+  fs.writeFileSync(envPath, content, 'utf8');
+  process.env[key] = val;
+}
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve client dist in production or standalone mode
+const clientDistCandidates = [
+  path.join(process.cwd(), 'client', 'dist'),
+  path.join(__dirname, '..', 'client', 'dist'),
+  path.join(process.resourcesPath || '', 'app.asar', 'client', 'dist')
+];
+const clientDistPath = clientDistCandidates.find(p => fs.existsSync(p));
+if (clientDistPath) {
+  app.use(express.static(clientDistPath, {
+    maxAge: '1d',
+    etag: true
+  }));
+}
 
 // Helper to get local network IPv4 address for mobile access
 function getLocalNetworkIp() {
@@ -401,20 +474,413 @@ app.get('/api/events', (req, res) => {
   });
 });
 
+// ====================================================
+// AUTHENTICATION & USER MANAGEMENT ROUTES (CRUD + OTP)
+// ====================================================
+
+let pendingDesktopAuth = null;
+
+// Desktop Handoff: Post token from browser
+app.post('/api/auth/desktop-handoff', (req, res) => {
+  const { token, user } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token is required' });
+  pendingDesktopAuth = {
+    token,
+    user,
+    timestamp: Date.now()
+  };
+  broadcastEvent('desktop_auth_ready', { token, user });
+  res.json({ success: true, message: 'Token queued for desktop handoff' });
+});
+
+// Desktop Handoff: Poll or check from desktop Electron
+app.get('/api/auth/desktop-handoff', (req, res) => {
+  if (pendingDesktopAuth && Date.now() - pendingDesktopAuth.timestamp < 120000) {
+    const data = { ...pendingDesktopAuth };
+    pendingDesktopAuth = null; // consume token
+    return res.json({ pending: true, ...data });
+  }
+  res.json({ pending: false });
+});
+
+function extractAuthToken(req) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7).trim();
+  }
+  return req.headers['x-session-token'] || req.query.token || null;
+}
+
+// Register new user (Email + Password)
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { email, password, displayName } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+    const user = createUser({ email, password, displayName });
+    const session = createAuthSession(user.id);
+    res.status(201).json({
+      success: true,
+      user,
+      token: session.token,
+      expiresAt: session.expiresAt
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Login (Email + Password)
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+    const user = verifyUserPassword(email, password);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const session = createAuthSession(user.id);
+    res.json({
+      success: true,
+      user,
+      token: session.token,
+      expiresAt: session.expiresAt
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ====================================================
+// REAL DIRECT GOOGLE OAUTH 2.0 INTEGRATION
+// ====================================================
+
+// Google OAuth Configuration status
+app.get('/api/auth/google/config', (req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID || null;
+  res.json({
+    configured: Boolean(clientId),
+    clientId: clientId ? `${clientId.slice(0, 16)}...` : null
+  });
+});
+
+// Update Google OAuth Configuration in .env
+app.post('/api/auth/google/config', (req, res) => {
+  try {
+    const { clientId, clientSecret } = req.body;
+    if (!clientId || !clientId.trim()) {
+      return res.status(400).json({ error: 'Client ID is required' });
+    }
+    saveEnvVar('GOOGLE_CLIENT_ID', clientId.trim());
+    if (clientSecret && clientSecret.trim()) {
+      saveEnvVar('GOOGLE_CLIENT_SECRET', clientSecret.trim());
+    }
+    res.json({ success: true, message: 'Google OAuth configuration saved successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Direct Google OAuth URL generator
+app.get('/api/auth/google/url', (req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    return res.status(400).json({
+      configured: false,
+      error: 'Google OAuth is not yet configured. Please supply your GOOGLE_CLIENT_ID.'
+    });
+  }
+  const redirectUri = `http://localhost:${PORT}/api/auth/google/callback`;
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'openid email profile',
+    access_type: 'offline',
+    prompt: 'select_account'
+  });
+  res.json({
+    configured: true,
+    url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+  });
+});
+
+// Direct Google OAuth Callback
+app.get('/api/auth/google/callback', async (req, res) => {
+  const { code, error } = req.query;
+  if (error) {
+    return res.redirect(`/?auth_error=${encodeURIComponent(error)}`);
+  }
+  if (!code) {
+    return res.redirect(`/?auth_error=No_authorization_code_received`);
+  }
+
+  try {
+    const redirectUri = `http://localhost:${PORT}/api/auth/google/callback`;
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code: String(code),
+        client_id: process.env.GOOGLE_CLIENT_ID || '',
+        client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code'
+      })
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenRes.ok || !tokenData.access_token) {
+      throw new Error(tokenData.error_description || tokenData.error || 'Failed to exchange authorization code with Google');
+    }
+
+    // Retrieve verified real user profile from Google UserInfo endpoint
+    const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` }
+    });
+    const profile = await profileRes.json();
+    if (!profile.email) {
+      throw new Error('Google did not return a verified email address');
+    }
+
+    const email = profile.email;
+    const displayName = profile.name || profile.given_name || email.split('@')[0];
+    const avatarUrl = profile.picture || '';
+
+    const user = createOrLoginGoogleUser({ email, displayName, avatarUrl });
+    const session = createAuthSession(user.id);
+
+    // Queue desktop handoff
+    pendingDesktopAuth = { token: session.token, user, timestamp: Date.now() };
+    broadcastEvent('desktop_auth_ready', { token: session.token, user });
+
+    // HTML redirect that handles both web token storage and desktop deep linking
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Google Sign-In Successful - Agent Board</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="background:#07090E;color:#D4AF37;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;text-align:center;padding:20px;">
+        <div style="background:#0f172a;border:1px solid rgba(212,175,55,0.4);border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+          <div style="width:48px;height:48px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 16px auto;font-size:24px;">✓</div>
+          <h2 style="margin:0 0 8px 0;color:#fff;font-size:20px;">Signed in as ${displayName}</h2>
+          <p style="color:#94a3b8;font-size:13px;margin:0 0 20px 0;">(${email})</p>
+          <p style="color:#D4AF37;font-size:14px;font-weight:600;">Unlocking Agent Board Cockpit...</p>
+        </div>
+        <iframe src="agentboard://auth?token=${session.token}" style="display:none;"></iframe>
+        <script>
+          try {
+            localStorage.setItem('agent_board_session_token', '${session.token}');
+          } catch(e) {}
+          setTimeout(function() {
+            window.location.href = '/?auth_success=true&token=${session.token}';
+          }, 900);
+        </script>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>Google Authentication Error</title></head>
+      <body style="background:#07090E;color:#ef4444;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;text-align:center;">
+        <h2>Google Authentication Failed</h2>
+        <p style="color:#94a3b8;max-width:500px;">${err.message}</p>
+        <a href="/" style="color:#D4AF37;margin-top:20px;text-decoration:none;border:1px solid #D4AF37;padding:8px 16px;border-radius:8px;">Return to Agent Board</a>
+      </body>
+      </html>
+    `);
+  }
+});
+
+// Direct Google Identity Services ID Token verification (One Tap / popup)
+app.post('/api/auth/google/verify-credential', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential JWT is required' });
+    }
+
+    const tokenInfoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!tokenInfoRes.ok) {
+      const errData = await tokenInfoRes.json();
+      return res.status(401).json({ error: errData.error_description || 'Invalid Google credential token' });
+    }
+
+    const payload = await tokenInfoRes.json();
+    if (!payload.email) {
+      return res.status(400).json({ error: 'Google credential does not contain an email' });
+    }
+
+    const email = payload.email;
+    const displayName = payload.name || payload.given_name || email.split('@')[0];
+    const avatarUrl = payload.picture || '';
+
+    const user = createOrLoginGoogleUser({ email, displayName, avatarUrl });
+    const session = createAuthSession(user.id);
+
+    pendingDesktopAuth = { token: session.token, user, timestamp: Date.now() };
+    broadcastEvent('desktop_auth_ready', { token: session.token, user });
+
+    res.json({
+      success: true,
+      user,
+      token: session.token,
+      expiresAt: session.expiresAt
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Google OAuth Login / Register (from verified frontend auth providers)
+app.post('/api/auth/google', (req, res) => {
+  try {
+    const { email, displayName, avatarUrl } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required from Google Auth' });
+    }
+    const user = createOrLoginGoogleUser({ email, displayName, avatarUrl });
+    const session = createAuthSession(user.id);
+    res.json({
+      success: true,
+      user,
+      token: session.token,
+      expiresAt: session.expiresAt
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Forgot Password (Generate & dispatch OTP)
+app.post('/api/auth/forgot-password', (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+    const result = generatePasswordOtp(email);
+    res.json({
+      success: true,
+      message: `A 6-digit recovery OTP has been generated for ${email}. Check terminal or inbox.`,
+      email: result.email,
+      expiresAt: result.expiresAt,
+      otpPreview: result.otpPreview
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Verify OTP
+app.post('/api/auth/verify-otp', (req, res) => {
+  try {
+    const { email, otpCode } = req.body;
+    if (!email || !otpCode) {
+      return res.status(400).json({ error: 'Email and OTP code are required' });
+    }
+    const isValid = verifyPasswordOtp(email, otpCode);
+    if (!isValid) {
+      return res.status(400).json({ error: 'Invalid or expired OTP code' });
+    }
+    res.json({ success: true, message: 'OTP verified successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reset Password with OTP
+app.post('/api/auth/reset-password', (req, res) => {
+  try {
+    const { email, otpCode, newPassword } = req.body;
+    if (!email || !otpCode || !newPassword) {
+      return res.status(400).json({ error: 'Email, OTP code, and new password are required' });
+    }
+    resetPasswordWithOtp(email, otpCode, newPassword);
+    res.json({ success: true, message: 'Password has been reset successfully. You can now log in.' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Get Current Authenticated User
+app.get('/api/auth/me', (req, res) => {
+  const token = extractAuthToken(req);
+  if (!token) {
+    return res.status(401).json({ error: 'No session token provided' });
+  }
+  const user = getUserByToken(token);
+  if (!user) {
+    return res.status(401).json({ error: 'Session expired or invalid' });
+  }
+  res.json({ success: true, user });
+});
+
+// Update User Profile
+app.post('/api/auth/update-profile', (req, res) => {
+  const token = extractAuthToken(req);
+  const user = getUserByToken(token);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const updated = updateUserProfile(user.id, req.body);
+    res.json({ success: true, user: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Change Password
+app.post('/api/auth/change-password', (req, res) => {
+  const token = extractAuthToken(req);
+  const user = getUserByToken(token);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const { oldPassword, newPassword } = req.body;
+    changeUserPassword(user.id, oldPassword, newPassword);
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete Account (Cascade cleanup)
+app.post('/api/auth/delete-account', (req, res) => {
+  const token = extractAuthToken(req);
+  const user = getUserByToken(token);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    deleteUser(user.id);
+    res.json({ success: true, message: 'Account and associated data deleted permanently' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Logout
+app.post('/api/auth/logout', (req, res) => {
+  const token = extractAuthToken(req);
+  if (token) deleteAuthSession(token);
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
 // 404 fallback for API routes
 app.all('/api/*', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
-// Serve client dist in production or standalone mode
-const clientDistCandidates = [
-  path.join(process.cwd(), 'client', 'dist'),
-  path.join(__dirname, '..', 'client', 'dist'),
-  path.join(process.resourcesPath || '', 'app.asar', 'client', 'dist')
-];
-const clientDistPath = clientDistCandidates.find(p => fs.existsSync(p));
+// SPA fallback for HTML5 routing
 if (clientDistPath) {
-  app.use(express.static(clientDistPath));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.sendFile(path.join(clientDistPath, 'index.html'));
@@ -428,6 +894,6 @@ app.listen(PORT, () => {
   console.log(`📱 Mobile (Wi-Fi): http://${LOCAL_IP}:${PORT}`);
   console.log(`======================================================\n`);
   
-  // Start 24/7 cloud sync bridge if Supabase is configured
-  startCloudBridge(5000);
+  // Start 24/7 cloud sync bridge if Supabase is configured (every 30 seconds)
+  startCloudBridge(30000);
 });

@@ -7,3 +7,6 @@ client/dist/
 *.log
 .DS_Store
 dist-desktop/
+*.db
+*.db-shm
+*.db-wal

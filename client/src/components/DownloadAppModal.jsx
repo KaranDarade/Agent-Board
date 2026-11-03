@@ -24,8 +24,8 @@ export default function DownloadAppModal({ isOpen, onClose }) {
   const handleDownload = () => {
     setDownloading(true);
     if (isCloud) {
-      window.open('https://github.com/KaranDarade/Agent-Board/releases', '_blank');
-      setTimeout(() => setDownloading(false), 1000);
+      window.location.href = 'https://github.com/KaranDarade/Agent-Board/releases/download/v1.0.0/Agent.Board.Setup.1.0.0.exe';
+      setTimeout(() => setDownloading(false), 2000);
     } else {
       window.location.href = '/api/download/desktop';
       setTimeout(() => setDownloading(false), 3000);

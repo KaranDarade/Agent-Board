@@ -9,6 +9,12 @@ import MobileAccessModal from './components/MobileAccessModal.jsx';
 import CreateSessionModal from './components/CreateSessionModal.jsx';
 import ModelSelectorModal from './components/ModelSelectorModal.jsx';
 import DownloadAppModal from './components/DownloadAppModal.jsx';
+import ShowcaseLanding from './components/ShowcaseLanding.jsx';
+import InteractiveDemoSandbox from './components/InteractiveDemoSandbox.jsx';
+import AuthModal from './components/AuthModal.jsx';
+import UserProfileModal from './components/UserProfileModal.jsx';
+import DesktopAuthScreen from './components/DesktopAuthScreen.jsx';
+import { supabase } from './supabaseClient.js';
 import { 
   Search, 
   LayoutGrid, 
@@ -36,6 +42,215 @@ export default function App() {
 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  // Environment detection: Check for Electron Desktop context or ?app=desktop URL flag
+  const isDesktopApp = typeof window !== 'undefined' && (
+    Boolean(window.agentBoardDesktop?.isDesktop) ||
+    new URLSearchParams(window.location.search).get('app') === 'desktop'
+  );
+  const isMobileDevice = typeof window !== 'undefined' && (
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    new URLSearchParams(window.location.search).get('mode') === 'mobile' ||
+    new URLSearchParams(window.location.search).get('mobile') === 'true'
+  );
+  const isLocalHost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('.local')
+  );
+
+  // Auth state
+  const [sessionToken, setSessionToken] = useState(() => {
+    return localStorage.getItem('agent_board_session_token') || null;
+  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState('signin');
+  const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
+
+  // View state: 'operational' | 'showcase' | 'demo'
+  const [currentView, setCurrentView] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get('mode');
+      if (mode === 'demo' || mode === 'sandbox') return 'demo';
+      if (mode === 'operational' || mode === 'dashboard') return 'operational';
+    }
+    return 'showcase';
+  });
+
+  // Effective view:
+  // In Desktop mode: Unauthenticated visitors ONLY see 'desktop_auth' (never showcase or demo). Authenticated users see 'operational' directly.
+  // In Mobile mode: Mobile companion view is enabled (or 'demo' if requested).
+  // In Desktop Web mode: Live operational cockpit is completely disabled! Web visitors only see 'showcase' or 'demo', and are instructed to download the native Windows desktop app to access local agent telemetry.
+  const effectiveView = isDesktopApp
+    ? (currentUser ? 'operational' : 'desktop_auth')
+    : isMobileDevice
+      ? (currentView === 'demo' ? 'demo' : 'operational')
+      : (currentView === 'demo' ? 'demo' : 'showcase');
+
+  const handleAuthSuccess = useCallback((user, token) => {
+    setCurrentUser(user);
+    setSessionToken(token);
+    localStorage.setItem('agent_board_session_token', token);
+    
+    if (isDesktopApp || isMobileDevice) {
+      setCurrentView('operational');
+      showBanner(`Welcome, ${user.displayName || user.email}!`);
+    } else {
+      setCurrentView('showcase');
+      showBanner(`Signed in as ${user.displayName || user.email}. Download the desktop app to connect your local agents!`);
+    }
+
+    // Synchronize token to local desktop handoff endpoint
+    fetch('/api/auth/desktop-handoff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, user })
+    }).catch(() => {});
+
+    // Trigger agentboard:// deep link if running in external browser
+    if (!isDesktopApp && typeof window !== 'undefined') {
+      try {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = `agentboard://auth?token=${token}`;
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 2000);
+      } catch (e) {}
+    }
+  }, [isDesktopApp, isMobileDevice]);
+
+  // Verify auth session on initial load & setup OAuth listeners
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('auth_intent=desktop')) {
+      setAuthModalTab('signin');
+      setAuthModalOpen(true);
+    }
+
+    const verifyToken = async () => {
+      const stored = localStorage.getItem('agent_board_session_token');
+      if (!stored) {
+        setAuthChecking(false);
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${stored}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUser(data.user);
+          setSessionToken(stored);
+          setCurrentView('operational');
+        } else {
+          localStorage.removeItem('agent_board_session_token');
+          setSessionToken(null);
+          setCurrentUser(null);
+        }
+      } catch (err) {
+        console.warn('Auth token verification error:', err.message);
+      } finally {
+        setAuthChecking(false);
+      }
+    };
+    verifyToken();
+
+    // Listen for desktop deep link token handoff via Electron IPC
+    let unsubDesktop = null;
+    if (isDesktopApp && window.agentBoardDesktop?.onAuthToken) {
+      unsubDesktop = window.agentBoardDesktop.onAuthToken(async ({ token }) => {
+        try {
+          const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+          if (res.ok) {
+            const d = await res.json();
+            handleAuthSuccess(d.user, token);
+          }
+        } catch (e) {}
+      });
+    }
+
+    // In desktop app, also listen for desktop_auth_ready SSE and poll desktop-handoff
+    let handoffEventSource = null;
+    let handoffInterval = null;
+
+    const checkDesktopHandoff = async () => {
+      try {
+        const res = await fetch('/api/auth/desktop-handoff');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.pending && data.token && data.user) {
+            handleAuthSuccess(data.user, data.token);
+          }
+        }
+      } catch (e) {}
+    };
+
+    if (isDesktopApp) {
+      try {
+        handoffEventSource = new EventSource('/api/events');
+        handoffEventSource.addEventListener('desktop_auth_ready', (evt) => {
+          try {
+            const data = JSON.parse(evt.data);
+            if (data.token && data.user) {
+              handleAuthSuccess(data.user, data.token);
+            }
+          } catch (e) {}
+        });
+      } catch (e) {}
+
+      window.addEventListener('focus', checkDesktopHandoff);
+      handoffInterval = setInterval(checkDesktopHandoff, 2500);
+    }
+
+    // Listen for Supabase OAuth redirect (Google Sign-In)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user && !currentUser) {
+        try {
+          const res = await fetch('/api/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: session.user.email,
+              displayName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+              avatarUrl: session.user.user_metadata?.avatar_url || ''
+            })
+          });
+          if (res.ok) {
+            const d = await res.json();
+            handleAuthSuccess(d.user, d.token);
+          }
+        } catch (e) {
+          console.warn('OAuth sync notice:', e.message);
+        }
+      }
+    });
+
+    return () => {
+      if (unsubDesktop) unsubDesktop();
+      subscription?.unsubscribe();
+      if (handoffEventSource) handoffEventSource.close();
+      if (handoffInterval) clearInterval(handoffInterval);
+      window.removeEventListener('focus', checkDesktopHandoff);
+    };
+  }, [isDesktopApp, handleAuthSuccess]);
+
+  const handleSignOut = async () => {
+    try {
+      if (sessionToken) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${sessionToken}` }
+        });
+      }
+    } catch (e) {}
+    localStorage.removeItem('agent_board_session_token');
+    setCurrentUser(null);
+    setSessionToken(null);
+    setCurrentView('showcase');
+    showBanner('Signed out successfully.');
   };
 
   // Fleet state
@@ -102,6 +317,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (effectiveView !== 'operational' || !currentUser) return;
     fetchData();
 
     // SSE connection for live updates
@@ -134,7 +350,7 @@ export default function App() {
     return () => {
       if (eventSource) eventSource.close();
     };
-  }, [fetchData]);
+  }, [fetchData, effectiveView, currentUser]);
 
   // Mode Switch Handler (PLAN ⇄ BUILD)
   const handleModeChange = async (sessionId, newMode) => {
@@ -275,6 +491,91 @@ export default function App() {
 
   const uniqueProjects = Array.from(new Set(sessions.map(s => s.projectName).filter(Boolean)));
 
+  // 1. Desktop Mode (Unauthenticated): Dedicated Native Workstation Auth Screen
+  if (effectiveView === 'desktop_auth') {
+    return (
+      <DesktopAuthScreen 
+        onAuthSuccess={handleAuthSuccess}
+      />
+    );
+  }
+
+  // 2. Web Mode (Unauthenticated): Showcase Landing Page with Screenshots & Downloads
+  if (effectiveView === 'showcase') {
+    return (
+      <>
+        <ShowcaseLanding
+          onLaunchDemo={() => setCurrentView('demo')}
+          onOpenDownload={() => setIsDownloadOpen(true)}
+          onSwitchToDashboard={() => {
+            if (isDesktopApp || isMobileDevice) {
+              setCurrentView('operational');
+            } else {
+              setIsDownloadOpen(true);
+            }
+          }}
+          isLocalHost={isLocalHost || isDesktopApp}
+          currentUser={currentUser}
+          onOpenAuth={(tab) => {
+            setAuthModalTab(tab || 'signin');
+            setAuthModalOpen(true);
+          }}
+          onOpenProfile={() => setUserProfileModalOpen(true)}
+          onSignOut={handleSignOut}
+        />
+        {isDownloadOpen && (
+          <DownloadAppModal
+            isOpen={isDownloadOpen}
+            onClose={() => setIsDownloadOpen(false)}
+          />
+        )}
+        {authModalOpen && (
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+            onAuthSuccess={handleAuthSuccess}
+            initialTab={authModalTab}
+          />
+        )}
+        {userProfileModalOpen && (
+          <UserProfileModal
+            isOpen={userProfileModalOpen}
+            onClose={() => setUserProfileModalOpen(false)}
+            user={currentUser}
+            token={sessionToken}
+            onProfileUpdated={(u) => setCurrentUser(u)}
+            onSignOut={handleSignOut}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (effectiveView === 'demo') {
+    return (
+      <>
+        <InteractiveDemoSandbox
+          onBackToLanding={() => setCurrentView('showcase')}
+          onOpenDownload={() => setIsDownloadOpen(true)}
+        />
+        {isDownloadOpen && (
+          <DownloadAppModal
+            isOpen={isDownloadOpen}
+            onClose={() => setIsDownloadOpen(false)}
+          />
+        )}
+        {authModalOpen && (
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+            onAuthSuccess={handleAuthSuccess}
+            initialTab={authModalTab}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-ivory-50 dark:bg-obsidian-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Top Navigation */}
@@ -288,7 +589,17 @@ export default function App() {
         activeCount={stats?.activeSessions || 0}
         onOpenMobile={() => setIsMobileOpen(true)}
         onOpenCreateSession={() => setIsCreateOpen(true)}
-        onOpenDownload={() => setIsDownloadOpen(true)}
+        onOpenDownload={isDesktopApp ? null : () => setIsDownloadOpen(true)}
+        onOpenShowcase={isDesktopApp ? null : () => setCurrentView('showcase')}
+        currentUser={currentUser}
+        onOpenAuth={(tab) => {
+          setAuthModalTab(tab || 'signin');
+          setAuthModalOpen(true);
+        }}
+        onOpenProfile={() => setUserProfileModalOpen(true)}
+        onSignOut={handleSignOut}
+        isLocalHost={isLocalHost}
+        isDesktop={isDesktopApp}
         tools={tools}
       />
 
@@ -545,11 +856,33 @@ export default function App() {
         />
       )}
 
-      {/* Download Desktop App Modal */}
-      {isDownloadOpen && (
+      {/* Download Desktop App Modal (Web only) */}
+      {!isDesktopApp && isDownloadOpen && (
         <DownloadAppModal
           isOpen={isDownloadOpen}
           onClose={() => setIsDownloadOpen(false)}
+        />
+      )}
+
+      {/* Auth Modal (Sign In, Sign Up, Forgot Password / OTP) */}
+      {authModalOpen && (
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          onAuthSuccess={handleAuthSuccess}
+          initialTab={authModalTab}
+        />
+      )}
+
+      {/* User Profile & Account Management Modal */}
+      {userProfileModalOpen && (
+        <UserProfileModal
+          isOpen={userProfileModalOpen}
+          onClose={() => setUserProfileModalOpen(false)}
+          user={currentUser}
+          token={sessionToken}
+          onProfileUpdated={(updated) => setCurrentUser(updated)}
+          onSignOut={handleSignOut}
         />
       )}
     </div>

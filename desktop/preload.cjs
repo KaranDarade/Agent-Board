@@ -23,5 +23,12 @@ contextBridge.exposeInMainWorld('agentBoardDesktop', {
     const handler = (event, data) => callback(data);
     ipcRenderer.on('app:update-status', handler);
     return () => ipcRenderer.removeListener('app:update-status', handler);
+  },
+
+  // Auth token handoff listener
+  onAuthToken: (callback) => {
+    const handler = (event, data) => callback(data);
+    ipcRenderer.on('app:auth-token', handler);
+    return () => ipcRenderer.removeListener('app:auth-token', handler);
   }
 });

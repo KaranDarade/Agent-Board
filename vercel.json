@@ -4,6 +4,10 @@
   "outputDirectory": "client/dist",
   "rewrites": [
     {
+      "source": "/api/auth/:action*",
+      "destination": "/api/auth.js"
+    },
+    {
       "source": "/api/fleet/sessions",
       "destination": "/api/fleet-sessions.js"
     },

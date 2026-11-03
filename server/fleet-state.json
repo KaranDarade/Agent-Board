@@ -2,6 +2,86 @@
   "archived": [],
   "directives": [
     {
+      "id": "dir_1793703489141",
+      "sessionId": "ses_mw0kqg7b9a9w41mXy3ox",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793703489141,
+      "status": "failed",
+      "output": "timestamp=2026-11-03T10:58:11.204Z level=INFO run=63489d74 message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T10:58:11.211Z level=INFO run=63489d74 message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T10:58:11.736Z level=INFO run=63489d74 message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T10:58:11.750Z level=INFO run=63489d74 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-11-03T10:58:11.752Z level=INFO run=63489d74 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-11-03T10:58:11.752Z level=INFO run=63489d74 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-11-03T10:58:11.888Z level=INFO run=63489d74 message=\"all LSPs are disabled\"\ntimestamp=2026-11-03T10:58:11.890Z level=INFO run=63489d74 message=\"all formatters are disabled\"\ntimestamp=2026-11-03T10:58:11.890Z level=INFO run=63489d74 message=init\ntimestamp=2026-11-03T10:58:12.352Z level=INFO run=63489d74 message=\"event connected\"\ntimestamp=2026-11-03T10:58:14.094Z level=ERROR run=63489d74 message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-11-03T10:58:14.122Z level=INFO run=63489d74 message=loop session.id=ses_mw0kqg7b9a9w41mXy3ox step=0\ntimestamp=2026-11-03T10:58:14.133Z level=ERROR run=63489d74 message=failed ref=err_a53561be error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_a53561be\"\n  }\n}\r\ntimestamp=2026-11-03T10:58:14.135Z level=INFO run=63489d74 message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793702527771",
+      "sessionId": "ses_mw0k67r1WFvHaBM6ZWG2",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793702527771,
+      "status": "failed",
+      "output": "timestamp=2026-11-03T10:42:09.242Z level=INFO run=52843141 message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T10:42:09.248Z level=INFO run=52843141 message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T10:42:09.742Z level=INFO run=52843141 message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T10:42:09.763Z level=INFO run=52843141 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-11-03T10:42:09.764Z level=INFO run=52843141 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-11-03T10:42:09.765Z level=INFO run=52843141 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-11-03T10:42:09.886Z level=INFO run=52843141 message=\"all LSPs are disabled\"\ntimestamp=2026-11-03T10:42:09.888Z level=INFO run=52843141 message=\"all formatters are disabled\"\ntimestamp=2026-11-03T10:42:09.888Z level=INFO run=52843141 message=init\ntimestamp=2026-11-03T10:42:10.188Z level=INFO run=52843141 message=\"event connected\"\ntimestamp=2026-11-03T10:42:10.977Z level=ERROR run=52843141 message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-11-03T10:42:10.998Z level=INFO run=52843141 message=loop session.id=ses_mw0k67r1WFvHaBM6ZWG2 step=0\ntimestamp=2026-11-03T10:42:11.007Z level=ERROR run=52843141 message=failed ref=err_88a326eb error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_88a326eb\"\n  }\n}\r\ntimestamp=2026-11-03T10:42:11.009Z level=INFO run=52843141 message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793699445836",
+      "sessionId": "ses_mw0ibvodqjGONaQiei62",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793699445836,
+      "status": "failed",
+      "output": "timestamp=2026-11-03T09:50:47.813Z level=INFO run=d3c3e48e message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T09:50:47.818Z level=INFO run=d3c3e48e message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T09:50:48.425Z level=INFO run=d3c3e48e message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-11-03T09:50:48.466Z level=INFO run=d3c3e48e message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-11-03T09:50:48.481Z level=INFO run=d3c3e48e message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-11-03T09:50:48.483Z level=INFO run=d3c3e48e message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-11-03T09:50:48.887Z level=INFO run=d3c3e48e message=\"all LSPs are disabled\"\ntimestamp=2026-11-03T09:50:48.890Z level=INFO run=d3c3e48e message=\"all formatters are disabled\"\ntimestamp=2026-11-03T09:50:48.890Z level=INFO run=d3c3e48e message=init\ntimestamp=2026-11-03T09:50:49.279Z level=INFO run=d3c3e48e message=\"event connected\"\ntimestamp=2026-11-03T09:50:50.402Z level=ERROR run=d3c3e48e message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-11-03T09:50:50.435Z level=INFO run=d3c3e48e message=loop session.id=ses_mw0ibvodqjGONaQiei62 step=0\ntimestamp=2026-11-03T09:50:50.446Z level=ERROR run=d3c3e48e message=failed ref=err_bf11cba7 error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_bf11cba7\"\n  }\n}\r\ntimestamp=2026-11-03T09:50:50.448Z level=INFO run=d3c3e48e message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793365209055",
+      "sessionId": "ses_mvuzbv2vIwD2GvXlVhPS",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793365209055,
+      "status": "failed",
+      "output": "timestamp=2026-10-30T13:00:11.164Z level=INFO run=0fe6317a message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T13:00:11.172Z level=INFO run=0fe6317a message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T13:00:12.058Z level=INFO run=0fe6317a message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T13:00:12.080Z level=INFO run=0fe6317a message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-10-30T13:00:12.091Z level=INFO run=0fe6317a message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-10-30T13:00:12.092Z level=INFO run=0fe6317a message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-10-30T13:00:12.339Z level=INFO run=0fe6317a message=\"all LSPs are disabled\"\ntimestamp=2026-10-30T13:00:12.341Z level=INFO run=0fe6317a message=\"all formatters are disabled\"\ntimestamp=2026-10-30T13:00:12.341Z level=INFO run=0fe6317a message=init\ntimestamp=2026-10-30T13:00:13.023Z level=INFO run=0fe6317a message=\"event connected\"\ntimestamp=2026-10-30T13:00:15.241Z level=ERROR run=0fe6317a message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-10-30T13:00:15.277Z level=INFO run=0fe6317a message=loop session.id=ses_mvuzbv2vIwD2GvXlVhPS step=0\ntimestamp=2026-10-30T13:00:15.295Z level=ERROR run=0fe6317a message=failed ref=err_c0148f08 error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_c0148f08\"\n  }\n}\r\ntimestamp=2026-10-30T13:00:15.299Z level=INFO run=0fe6317a message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793365127744",
+      "sessionId": "ses_mvuza1deUjK2cSmnGANF",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793365127744,
+      "status": "failed",
+      "output": "timestamp=2026-10-30T12:58:51.385Z level=INFO run=3713c1c7 message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T12:58:51.397Z level=INFO run=3713c1c7 message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T12:58:52.868Z level=INFO run=3713c1c7 message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T12:58:52.945Z level=INFO run=3713c1c7 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-10-30T12:58:52.983Z level=INFO run=3713c1c7 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-10-30T12:58:53.018Z level=INFO run=3713c1c7 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-10-30T12:58:53.562Z level=INFO run=3713c1c7 message=\"all LSPs are disabled\"\ntimestamp=2026-10-30T12:58:53.566Z level=INFO run=3713c1c7 message=\"all formatters are disabled\"\ntimestamp=2026-10-30T12:58:53.566Z level=INFO run=3713c1c7 message=init\ntimestamp=2026-10-30T12:58:54.381Z level=INFO run=3713c1c7 message=\"event connected\"\ntimestamp=2026-10-30T12:58:56.892Z level=ERROR run=3713c1c7 message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-10-30T12:58:56.962Z level=INFO run=3713c1c7 message=loop session.id=ses_mvuza1deUjK2cSmnGANF step=0\ntimestamp=2026-10-30T12:58:56.993Z level=ERROR run=3713c1c7 message=failed ref=err_8237d314 error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_8237d314\"\n  }\n}\r\ntimestamp=2026-10-30T12:58:57.000Z level=INFO run=3713c1c7 message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793362853458",
+      "sessionId": "ses_mvuxxtg2Hf2hSCSiebhR",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793362853458,
+      "status": "failed",
+      "output": "timestamp=2026-10-30T12:20:55.008Z level=INFO run=1ef77cc0 message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T12:20:55.011Z level=INFO run=1ef77cc0 message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T12:20:55.353Z level=INFO run=1ef77cc0 message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T12:20:55.364Z level=INFO run=1ef77cc0 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-10-30T12:20:55.370Z level=INFO run=1ef77cc0 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-10-30T12:20:55.383Z level=INFO run=1ef77cc0 message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-10-30T12:20:55.503Z level=INFO run=1ef77cc0 message=\"all LSPs are disabled\"\ntimestamp=2026-10-30T12:20:55.504Z level=INFO run=1ef77cc0 message=\"all formatters are disabled\"\ntimestamp=2026-10-30T12:20:55.504Z level=INFO run=1ef77cc0 message=init\n\u001b[91m\u001b[1mError: \u001b[0mSession not found\r\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793359884709",
+      "sessionId": "ses_mvuw5ziyqlaYOqaZtBw1",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793359884709,
+      "status": "failed",
+      "output": "timestamp=2026-10-30T11:31:25.912Z level=INFO run=e5137f0f message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T11:31:25.914Z level=INFO run=e5137f0f message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T11:31:26.250Z level=INFO run=e5137f0f message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T11:31:26.264Z level=INFO run=e5137f0f message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-10-30T11:31:26.265Z level=INFO run=e5137f0f message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-10-30T11:31:26.265Z level=INFO run=e5137f0f message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-10-30T11:31:26.371Z level=INFO run=e5137f0f message=\"all LSPs are disabled\"\ntimestamp=2026-10-30T11:31:26.372Z level=INFO run=e5137f0f message=\"all formatters are disabled\"\ntimestamp=2026-10-30T11:31:26.372Z level=INFO run=e5137f0f message=init\ntimestamp=2026-10-30T11:31:26.630Z level=INFO run=e5137f0f message=\"event connected\"\ntimestamp=2026-10-30T11:31:27.354Z level=ERROR run=e5137f0f message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-10-30T11:31:27.370Z level=INFO run=e5137f0f message=loop session.id=ses_mvuw5ziyqlaYOqaZtBw1 step=0\ntimestamp=2026-10-30T11:31:27.376Z level=ERROR run=e5137f0f message=failed ref=err_129b2ac5 error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_129b2ac5\"\n  }\n}\r\ntimestamp=2026-10-30T11:31:27.378Z level=INFO run=e5137f0f message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
+      "id": "dir_1793359836929",
+      "sessionId": "ses_mvuw4tamWxKjhGXL528z",
+      "tool": "opencode",
+      "prompt": "Please verify configuration files.",
+      "timestamp": 1793359836929,
+      "status": "failed",
+      "output": "timestamp=2026-10-30T11:30:38.639Z level=INFO run=aa64277e message=\"creating instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T11:30:38.644Z level=INFO run=aa64277e message=fromDirectory directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T11:30:39.136Z level=INFO run=aa64277e message=bootstrapping directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\ntimestamp=2026-10-30T11:30:39.148Z level=INFO run=aa64277e message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\config.json\"\ntimestamp=2026-10-30T11:30:39.160Z level=INFO run=aa64277e message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.json\"\ntimestamp=2026-10-30T11:30:39.161Z level=INFO run=aa64277e message=loading path=\"C:\\\\Users\\\\KARAN\\\\.config\\\\opencode\\\\opencode.jsonc\"\ntimestamp=2026-10-30T11:30:39.337Z level=INFO run=aa64277e message=\"all LSPs are disabled\"\ntimestamp=2026-10-30T11:30:39.339Z level=INFO run=aa64277e message=\"all formatters are disabled\"\ntimestamp=2026-10-30T11:30:39.339Z level=INFO run=aa64277e message=init\ntimestamp=2026-10-30T11:30:39.723Z level=INFO run=aa64277e message=\"event connected\"\ntimestamp=2026-10-30T11:30:40.728Z level=ERROR run=aa64277e message=\"share subscriber failed\" type=message.updated cause=\"Cause([Fail(ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?)])\"\ntimestamp=2026-10-30T11:30:40.745Z level=INFO run=aa64277e message=loop session.id=ses_mvuw4tamWxKjhGXL528z step=0\ntimestamp=2026-10-30T11:30:40.751Z level=ERROR run=aa64277e message=failed ref=err_44940a6a error=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\" cause=\"ProviderModelNotFoundError: Model not found: anthropic/claude-3-7-sonnet. Did you mean: claude-sonnet-4-5, claude-sonnet-4-5-20250929, claude-sonnet-4-6?\\n    at <anonymous> (B:/~BUN/root/chunk-382hv1mx.js:439:90131)\\n    at SessionPrompt.getModel (B:/~BUN/root/chunk-ds79dp30.js:1096:11490)\\n    at SessionPrompt.getModel (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:908)\\n    at SessionPrompt.run (B:/~BUN/root/chunk-ds79dp30.js:1096:15306)\\n    at SessionPrompt.run (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:10498)\\n    at SessionRunState.ensureRunning (B:/~BUN/root/chunk-ds79dp30.js:1096:15275)\\n    at SessionRunState.ensureRunning (definition) (B:/~BUN/root/chunk-ds79dp30.js:2:8179)\\n    at SessionPrompt.loop (B:/~BUN/root/chunk-ds79dp30.js:1096:10220)\\n    at SessionPrompt.loop (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:15211)\\n    at SessionPrompt.prompt (B:/~BUN/root/chunk-a07caw66.js:4:13220)\\n    at SessionPrompt.prompt (definition) (B:/~BUN/root/chunk-ds79dp30.js:1096:9838)\"\n\u001b[91m\u001b[1mError: \u001b[0m{\n  \"name\": \"UnknownError\",\n  \"data\": {\n    \"message\": \"Unexpected server error. Check server logs for details.\",\n    \"ref\": \"err_44940a6a\"\n  }\n}\r\ntimestamp=2026-10-30T11:30:40.753Z level=INFO run=aa64277e message=\"disposing instance\" directory=\"C:\\\\Users\\\\KARAN\\\\Desktop\\\\Web Development\\\\LightMove\"\n",
+      "exitCode": 1
+    },
+    {
       "id": "dir_1790167768776",
       "sessionId": "ses_mue3nww7msrkn8a4sTEP",
       "tool": "opencode",
@@ -132,7 +212,7 @@
   ],
   "customModes": {
     "ses_mucrdajxvtsb6BEdQmwn": "plan",
-    "816b2dfd-67c3-4dba-9370-65285ed45c34": "plan",
+    "816b2dfd-67c3-4dba-9370-65285ed45c34": "build",
     "ses_f367dd50bffe1OrgogEmK8u8bH": "build",
     "ses_mucsudojBaFzltsayRvO": "plan",
     "ses_mudrbt76NST7paeAiAva": "plan",
@@ -142,7 +222,17 @@
     "ses_mudxiqfitvo9pMjNgh9M": "plan",
     "ses_mue3nww7msrkn8a4sTEP": "plan",
     "ses_muo1009d4qRsyHccs5NQ": "plan",
-    "ses_muo153emIYrODgCF0aBJ": "plan"
+    "ses_muo153emIYrODgCF0aBJ": "plan",
+    "ses_mvuuskc6v0mepbIOtjBj": "plan",
+    "ses_mvuw4tamWxKjhGXL528z": "plan",
+    "ses_mvuw5ziyqlaYOqaZtBw1": "plan",
+    "ses_mvuw7079YGBEB9F9Jkmv": "plan",
+    "ses_mvuxxtg2Hf2hSCSiebhR": "plan",
+    "ses_mvuza1deUjK2cSmnGANF": "plan",
+    "ses_mvuzbv2vIwD2GvXlVhPS": "plan",
+    "ses_mw0ibvodqjGONaQiei62": "plan",
+    "ses_mw0k67r1WFvHaBM6ZWG2": "plan",
+    "ses_mw0kqg7b9a9w41mXy3ox": "plan"
   },
   "customModels": {
     "ses_mucrdajxvtsb6BEdQmwn": {
@@ -192,6 +282,56 @@
     },
     "ses_muo153emIYrODgCF0aBJ": {
       "id": "claude-3-5-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuuskc6v0mepbIOtjBj": {
+      "id": "claude-3-5-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuw4tamWxKjhGXL528z": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuw5ziyqlaYOqaZtBw1": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuw7079YGBEB9F9Jkmv": {
+      "id": "claude-3-5-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuxxtg2Hf2hSCSiebhR": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuza1deUjK2cSmnGANF": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mvuzbv2vIwD2GvXlVhPS": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mw0ibvodqjGONaQiei62": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mw0k67r1WFvHaBM6ZWG2": {
+      "id": "claude-3-7-sonnet",
+      "providerID": "anthropic",
+      "variant": "high"
+    },
+    "ses_mw0kqg7b9a9w41mXy3ox": {
+      "id": "claude-3-7-sonnet",
       "providerID": "anthropic",
       "variant": "high"
     }
